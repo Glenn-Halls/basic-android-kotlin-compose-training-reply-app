@@ -44,7 +44,9 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,10 +54,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.reply.R
 import com.example.reply.data.Email
 import com.example.reply.data.MailboxType
 import com.example.reply.data.local.LocalAccountsDataProvider
+import com.example.reply.ui.theme.ReplyTheme
 import com.example.reply.ui.utils.ReplyContentType
 import com.example.reply.ui.utils.ReplyNavigationType
 
@@ -94,6 +99,7 @@ fun ReplyHomeScreen(
     )
     
     if (navigationType == ReplyNavigationType.PERMANENT_NAVIGATION_DRAWER) {
+        val navigationDrawerContentDescription = stringResource(id = R.string.navigation_drawer)
         PermanentNavigationDrawer(
             drawerContent = {
                 PermanentDrawerSheet(Modifier.width(dimensionResource(id = R.dimen.drawer_width))) {
@@ -108,7 +114,8 @@ fun ReplyHomeScreen(
                             .padding(dimensionResource(id = R.dimen.drawer_padding_content))
                     )
                 }
-            }
+            },
+            modifier = Modifier.testTag(navigationDrawerContentDescription)
         ) {
             ReplyAppContent(
                 navigationType = navigationType,
@@ -308,3 +315,25 @@ private data class NavigationItemContent(
     val icon: ImageVector,
     val text: String
 )
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+fun ReplyAppCompactPreview() {
+    ReplyTheme {
+        ReplyApp(windowSize = WindowWidthSizeClass.Compact)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 1000)
+@Composable
+fun ReplyAppExpandedPreview() {
+    val viewModel: ReplyViewModel = viewModel()
+    val replyUiState = viewModel.uiState.collectAsState().value
+    ReplyHomeScreen(
+        navigationType = ReplyNavigationType.PERMANENT_NAVIGATION_DRAWER,
+        contentType = ReplyContentType.LIST_AND_DETAIL,
+        replyUiState = replyUiState,
+        onTabPressed = {},
+        onEmailCardPressed = {},
+        onDetailScreenBackPressed = {})
+}
